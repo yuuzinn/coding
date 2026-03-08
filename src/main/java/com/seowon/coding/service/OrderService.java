@@ -4,6 +4,7 @@ import com.seowon.coding.domain.model.Order;
 import com.seowon.coding.domain.model.OrderItem;
 import com.seowon.coding.domain.model.ProcessingStatus;
 import com.seowon.coding.domain.model.Product;
+import com.seowon.coding.domain.repository.OrderItemRepository;
 import com.seowon.coding.domain.repository.OrderRepository;
 import com.seowon.coding.domain.repository.ProcessingStatusRepository;
 import com.seowon.coding.domain.repository.ProductRepository;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class OrderService {
     
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
     private final ProcessingStatusRepository processingStatusRepository;
     
@@ -58,13 +60,49 @@ public class OrderService {
     public Order placeOrder(String customerName, String customerEmail, List<Long> productIds, List<Integer> quantities) {
         // TODO #3: 구현 항목
         // * 주어진 고객 정보로 새 Order를 생성
+        Order newOrder = Order.builder()
+                .customerName(customerName)
+                .customerEmail(customerEmail)
+                .build();
         // * 지정된 Product를 주문에 추가
+        if (productIds.size() != quantities.size()) {
+            throw new IllegalArgumentException("상품 정보가 올바르지 않습니다.");
+        }
+
+        List<Product> products = new ArrayList<>(productIds.size());
+
+        for (Long productId : productIds) {
+            Product productById = productRepository
+                    .findById(productId)
+                    .orElseThrow(() -> new IllegalArgumentException("상품 정보 없음"));
+            products.add(productById);
+        }
         // * order 의 상태를 PENDING 으로 변경
+        newOrder.setStatus(Order.OrderStatus.PENDING);
         // * orderDate 를 현재시간으로 설정
+        newOrder.setOrderDate(LocalDateTime.now());
         // * order 를 저장
+        orderRepository.save(newOrder);
         // * 각 Product 의 재고를 수정
+        for (int i = 0; i < products.size(); i++) {
+            Product product = products.get(i);
+            product.setStockQuantity(quantities.get(i));
+        }
+        productRepository.saveAll(products);
+
+        List<OrderItem> orderItems = new ArrayList<>(products.size());
+
+        for (int i = 0; i < products.size(); i++) {
+            OrderItem orderItem = OrderItem.builder()
+                    .order(newOrder)
+                    .product(products.get(i))
+                    .quantity(quantities.get(i))
+                    .build();
+            orderItems.add(orderItem);
+        }
+        orderItemRepository.saveAll(orderItems);
         // * placeOrder 메소드의 시그니처는 변경하지 않은 채 구현하세요.
-        return null;
+        return newOrder;
     }
 
     /**
