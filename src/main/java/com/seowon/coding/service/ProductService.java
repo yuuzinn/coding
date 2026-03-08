@@ -67,8 +67,10 @@ public class ProductService {
             Product p = productRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
 
+            // Product 객체 내 int 타입(형변환)으로 change 값 가져오기
             double base = p.getPrice() == null ? 0.0 : p.getPrice().doubleValue();
             double changed = base + (base * (percentage / 100.0)); // 부동소수점 오류 가능
+            // Product 객체 내 switch 문으로 지역/카테고리별 규칙으로 changed 재할당
             if (includeTax) {
                 changed = changed * 1.1; // 하드코딩 VAT 10%, 지역/카테고리별 규칙 미반영
             }
