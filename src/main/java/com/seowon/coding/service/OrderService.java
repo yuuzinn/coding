@@ -163,16 +163,23 @@ public class OrderService {
     public void bulkShipOrdersParent(String jobId, List<Long> orderIds) {
         ProcessingStatus ps = processingStatusRepository.findByJobId(jobId)
                 .orElseGet(() -> processingStatusRepository.save(ProcessingStatus.builder().jobId(jobId).build()));
+        // 리뷰 : 삼항 연산은 앞에서 if로 빼서 처리해도 괜찮을 거 같습니다
         ps.markRunning(orderIds == null ? 0 : orderIds.size());
         processingStatusRepository.save(ps);
 
         int processed = 0;
+        // 리뷰 : 삼항 연산은 for문에서 분리해서 넣는 작업이 좋을 것 같습니다..!
         for (Long orderId : (orderIds == null ? List.<Long>of() : orderIds)) {
             try {
                 // 오래 걸리는 작업 이라는 가정 시뮬레이션 (예: 외부 시스템 연동, 대용량 계산 등)
-                orderRepository.findById(orderId).ifPresent(o -> o.setStatus(Order.OrderStatus.PROCESSING));
+                // 리뷰 : 시간이 오래 걸린다면 트랜잭션 로직에서 빼는 게 좋을 거 같습니다.
+                // 리뷰 : CheckedException이 필요한 로직이 포함된다면 트랜잭션 롤백이 수행되지 않을 가능성이 있으니 조심해야합니다.
+                orderRepository.findById(orderId)
+                        .ifPresent(o -> o.setStatus(Order.OrderStatus.PROCESSING));
                 // 중간 진행률 저장
+                // 리뷰 : 메서드 내 Transactional이 붙은 메서드는 트랜잭션이 정상적으로 작동하지 않습니다. 때문에 트랜잭션을 분리해서 사용해야 합니다.
                 this.updateProgressRequiresNew(jobId, ++processed, orderIds.size());
+                // 리뷰 : 예외는 예상할 수 있는 Exception이 작은 범위에서 큰 범위로 처리를 하는 게 좋을 거 같습니다! exception 내용과 이유를 알아채기 쉽습니다.
             } catch (Exception e) {
             }
         }
