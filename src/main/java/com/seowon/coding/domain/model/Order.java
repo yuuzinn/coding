@@ -50,7 +50,7 @@ public class Order {
         item.setOrder(null);
         recalculateTotalAmount();
     }
-    
+
     public void recalculateTotalAmount() {
         this.totalAmount = items.stream()
                 .map(OrderItem::getSubtotal)
@@ -71,6 +71,17 @@ public class Order {
     
     public void markAsCancelled() {
         this.status = OrderStatus.CANCELLED;
+    }
+
+    public static Order of(String customerName, String customerEmail) {
+        return Order.builder()
+                .customerName(customerName)
+                .customerEmail(customerEmail)
+                .status(Order.OrderStatus.PENDING)
+                .orderDate(LocalDateTime.now())
+                .items(new ArrayList<>())
+                .totalAmount(BigDecimal.ZERO)
+                .build();
     }
     
     public enum OrderStatus {
