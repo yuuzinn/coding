@@ -1,12 +1,14 @@
 package com.seowon.coding.controller;
 
 import com.seowon.coding.domain.model.Order;
+import com.seowon.coding.dto.CreateOrderRequest;
+import com.seowon.coding.dto.ProductMetadataDto;
 import com.seowon.coding.service.OrderService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -66,5 +68,30 @@ public class OrderController {
      *   ]
      * }
      */
-    //
+    @PostMapping
+    public ResponseEntity<Void> createOrder(
+            @RequestBody CreateOrderRequest request
+    ) {
+        List<ProductMetadataDto> products = request.getProducts();
+
+        List<Long> productIds = new ArrayList<>();
+        List<Integer> quantities = new ArrayList<>();
+
+        for (ProductMetadataDto product : products) {
+            Long productId = product.getProductId();
+            Integer quantity = product.getQuantity();
+
+            productIds.add(productId);
+            quantities.add(quantity);
+        }
+
+        orderService.placeOrder(
+                request.getCustomerName(),
+                request.getCustomerEmail(),
+                productIds,
+                quantities
+        );
+
+        return (ResponseEntity<Void>) ResponseEntity.status(201);
+    }
 }
