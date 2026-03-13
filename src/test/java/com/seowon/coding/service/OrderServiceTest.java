@@ -3,6 +3,7 @@ package com.seowon.coding.service;
 import com.seowon.coding.domain.model.Order;
 import com.seowon.coding.domain.model.OrderItem;
 import com.seowon.coding.domain.model.Product;
+import com.seowon.coding.domain.repository.OrderItemRepository;
 import com.seowon.coding.domain.repository.OrderRepository;
 import com.seowon.coding.domain.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,9 @@ class OrderServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private OrderItemRepository orderItemRepository;
 
     @InjectMocks
     private OrderService orderService;
