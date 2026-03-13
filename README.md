@@ -13,8 +13,33 @@
 
 1. `ProductService#findProductsByCategory`에서 카테고리별 제품 조회 메소드 구현
 2. `OrderController`에 주문 생성 API 구현
-3. `OrderService#placeOrder`에 주문 생성 로직 구현
+3. `OrderService#placeOrder`에 주문 생성 로직 구현 --> 테스트 클래스의 `@InjectMock`에 대해 알지 못했던 것, JPA 연관관계 데이터를 저장해야 하는 것을 까먹었던 것
 4. 리팩토링: `OrderService#checkoutOrder`에 몰린 도메인 로직을 도메인 객체로 이동
 5. 코드 리뷰: `OrderService#bulkShipOrdersParent`의 구현코드 리뷰
 6. 리팩토링(가격/기준정보): `ProductService#applyBulkPriceChange` 개선
 7. 최적화: `PermissionChecker#hasPermission` 개선
+
+---
+
+> 3. `OrderService#placeOrder`에 주문 생성 로직 구현에서 `OrderItemRepository`가 NPE로 인해 테스트 실패했던 이슈
+
+Test 클래스 내 선언돼 있는 `OrderService`가 `@InjectMocks`어노테이션을 달고 선언돼 있었음.
+
+```java
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @InjectMocks
+    private OrderService orderService;
+```
+
+여기서 `@InjectMocks` 은 테스트하려는 진짜 클래스 객체를 생성한다. `@Mock`이 붙은 필드들을 모아서 이 객체의 생성자나 필드에 주입하는 방식이다.
+
+`OrderItemRepository`을 Mock으로 지정하지 않았기 때문에 NPE가 발생했던 이슈였다. `OrderItemRepository` `@Mock` 어노테이션을 달아서 NPE는 해결됐다.
+
+> 3. `OrderService#placeOrder` 테스트에서 값이 제대로 들어가지 않았던 이유
+
+`Order`와 `OrderItem` 클래스는 일대다 관계를 가지고 있는데, 각자의 객체를 생성해서 저장은 다 해놨지만 연관관계 데이터를 저장하지 않아서, `0(데이터가 저장되지 않음)`값으로 나왔었다. 연관관계 데이터(`Order.items`)를 저장하고나니 테스트를 통과했다.
