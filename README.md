@@ -21,6 +21,8 @@
 
 ---
 
+## 풀이 및 이슈 기타 등
+
 > 3. `OrderService#placeOrder`에 주문 생성 로직 구현에서 `OrderItemRepository`가 NPE로 인해 테스트 실패했던 이슈
 
 Test 클래스 내 선언돼 있는 `OrderService`가 `@InjectMocks`어노테이션을 달고 선언돼 있었음.
@@ -43,3 +45,11 @@ Test 클래스 내 선언돼 있는 `OrderService`가 `@InjectMocks`어노테이
 > 3. `OrderService#placeOrder` 테스트에서 값이 제대로 들어가지 않았던 이유
 
 `Order`와 `OrderItem` 클래스는 일대다 관계를 가지고 있는데, 각자의 객체를 생성해서 저장은 다 해놨지만 연관관계 데이터를 저장하지 않아서, `0(데이터가 저장되지 않음)`값으로 나왔었다. 연관관계 데이터(`Order.items`)를 저장하고나니 테스트를 통과했다.
+
+> 리팩토링(가격/기준정보): `ProductService#applyBulkPriceChange` 개선
+
+double 사용, 루프 내 개별 조회 및 저장, 하드코딩된 세금/반올림 규칙
+
+1. double 사용 - `BigDecimal`이라는 클래스에 대해 알아봐야함
+2. 루프 내 개별 조회 및 저장 - 루프마다 save 대신 saveAll로 처리해야함
+3. 하드코딩된 세금/반올림 규칙 - 지역/카테고리에 맞게 변경(카테고리 별 분기 기능 별도의 클래스 생성 필요해 보임)
