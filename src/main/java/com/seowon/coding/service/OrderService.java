@@ -69,20 +69,16 @@ public class OrderService {
             throw new IllegalArgumentException("상품 정보가 올바르지 않습니다.");
         }
 
-        List<Product> products = new ArrayList<>(productIds.size());
+        List<Product> products = productIds.stream()
+                .map(productId -> productRepository.findById(productId)
+                        .orElseThrow(() -> new IllegalArgumentException("상품 정보 없음")))
+                .toList();
 
-        for (Long productId : productIds) {
-            Product productById = productRepository
-                    .findById(productId)
-                    .orElseThrow(() -> new IllegalArgumentException("상품 정보 없음"));
-            products.add(productById);
-        }
         // * order 의 상태를 PENDING 으로 변경
         newOrder.setStatus(Order.OrderStatus.PENDING);
         // * orderDate 를 현재시간으로 설정
         newOrder.setOrderDate(LocalDateTime.now());
         // * order 를 저장
-        orderRepository.save(newOrder);
         // * 각 Product 의 재고를 수정
         for (int i = 0; i < products.size(); i++) {
             Product product = products.get(i);
@@ -101,6 +97,8 @@ public class OrderService {
             orderItems.add(orderItem);
         }
         orderItemRepository.saveAll(orderItems);
+        newOrder.setItems(orderItems);
+        orderRepository.save(newOrder);
         // * placeOrder 메소드의 시그니처는 변경하지 않은 채 구현하세요.
         return newOrder;
     }
