@@ -62,12 +62,15 @@ public class ProductService {
         if (productIds == null || productIds.isEmpty()) {
             throw new IllegalArgumentException("empty productIds");
         }
-        // 잘못된 구현 예시: double 사용, 루프 내 개별 조회/저장, 하드코딩 세금/반올림 규칙
-        for (Long id : productIds) {
-            Product p = productRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
-            p.updatePrice(percentage, includeTax);
-            productRepository.save(p); // 루프마다 저장 (비효율적)
+
+        List<Product> products = productRepository.findAllById(productIds);
+        if (products.isEmpty()) {
+            return;
         }
+
+        for (Product product : products) {
+            product.updatePrice(percentage, includeTax);
+        }
+        productRepository.saveAll(products);
     }
 }
