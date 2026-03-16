@@ -46,7 +46,7 @@ Test 클래스 내 선언돼 있는 `OrderService`가 `@InjectMocks`어노테이
 
 `Order`와 `OrderItem` 클래스는 일대다 관계를 가지고 있는데, 각자의 객체를 생성해서 저장은 다 해놨지만 연관관계 데이터를 저장하지 않아서, `0(데이터가 저장되지 않음)`값으로 나왔었다. 연관관계 데이터(`Order.items`)를 저장하고나니 테스트를 통과했다.
 
-> 리팩토링(가격/기준정보): `ProductService#applyBulkPriceChange` 개선
+> 6. 리팩토링(가격/기준정보): `ProductService#applyBulkPriceChange` 개선
 
 double 사용, 루프 내 개별 조회 및 저장, 하드코딩된 세금/반올림 규칙
 
