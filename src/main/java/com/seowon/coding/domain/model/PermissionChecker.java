@@ -3,7 +3,9 @@ package com.seowon.coding.domain.model;
 
 import lombok.Builder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class PermissionChecker {
 
@@ -19,29 +21,72 @@ class PermissionChecker {
             List<UserGroup> groups,
             List<Policy> policies
     ) {
-        for (User user : users) {
-            if (user.id.equals(userId)) {
-                for (String groupId : user.groupIds) {
-                    for (UserGroup group : groups) {
-                        if (group.id.equals(groupId)) {
-                            for (String policyId : group.policyIds) {
-                                for (Policy policy : policies) {
-                                    if (policy.id.equals(policyId)) {
-                                        for (Statement statement : policy.statements) {
-                                            if (statement.actions.contains(targetAction) &&
-                                                statement.resources.contains(targetResource)) {
-                                                return true;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+        Map<String, User> userMap = new HashMap<>();
+        for (User u : users) {
+            userMap.put(u.id, u);
+        }
+
+        User targetUser = userMap.get(userId);
+        if (targetUser == null) {
+            return false;
+        }
+
+        Map<String, UserGroup> userGroupMap = new HashMap<>();
+        for (UserGroup userGroup : groups) {
+            userGroupMap.put(userGroup.id, userGroup);
+        }
+
+
+        Map<String, Policy> policyMap = new HashMap<>();
+        for (Policy policy : policies) {
+            policyMap.put(policy.id, policy);
+        }
+
+        for (String groupId : targetUser.groupIds) {
+            UserGroup userGroup = userGroupMap.get(groupId);
+            if (userGroup == null) {
+                continue;
+            }
+            for (String policyId : userGroup.policyIds) {
+                Policy policy = policyMap.get(policyId);
+                if (policy == null) {
+                    continue;
+                }
+
+                for (Statement st : policy.statements) {
+                    if (st.actions.contains(targetAction) &&
+                            st.resources.contains(targetResource)) {
+                        return true;
                     }
                 }
             }
         }
         return false;
+
+
+//        for (User user : users) {
+//            if (user.id.equals(userId)) {
+//                for (String groupId : user.groupIds) {
+//                    for (UserGroup group : groups) {
+//                        if (group.id.equals(groupId)) {
+//                            for (String policyId : group.policyIds) {
+//                                for (Policy policy : policies) {
+//                                    if (policy.id.equals(policyId)) {
+//                                        for (Statement statement : policy.statements) {
+//                                            if (statement.actions.contains(targetAction) &&
+//                                                    statement.resources.contains(targetResource)) {
+//                                                return true;
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return false;
     }
 }
 
