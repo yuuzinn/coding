@@ -6,6 +6,7 @@ import lombok.Builder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 class PermissionChecker {
 
@@ -21,26 +22,21 @@ class PermissionChecker {
             List<UserGroup> groups,
             List<Policy> policies
     ) {
-        Map<String, User> userMap = new HashMap<>();
-        for (User u : users) {
-            userMap.put(u.id, u);
-        }
+        Map<String, User> userMap = users.stream()
+                .collect(Collectors.toMap(u -> u.id, u -> u));
 
         User targetUser = userMap.get(userId);
         if (targetUser == null) {
             return false;
         }
 
-        Map<String, UserGroup> userGroupMap = new HashMap<>();
-        for (UserGroup userGroup : groups) {
-            userGroupMap.put(userGroup.id, userGroup);
-        }
+        Map<String, UserGroup> userGroupMap = groups.stream()
+                .collect(Collectors.toMap(g -> g.id, g -> g));
 
 
-        Map<String, Policy> policyMap = new HashMap<>();
-        for (Policy policy : policies) {
-            policyMap.put(policy.id, policy);
-        }
+        Map<String, Policy> policyMap = policies.stream()
+                .collect(Collectors.toMap(p -> p.id, p -> p));
+
 
         for (String groupId : targetUser.groupIds) {
             UserGroup userGroup = userGroupMap.get(groupId);
