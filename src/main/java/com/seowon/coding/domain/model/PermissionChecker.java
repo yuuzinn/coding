@@ -62,31 +62,6 @@ class PermissionChecker {
             }
         }
         return false;
-
-
-//        for (User user : users) {
-//            if (user.id.equals(userId)) {
-//                for (String groupId : user.groupIds) {
-//                    for (UserGroup group : groups) {
-//                        if (group.id.equals(groupId)) {
-//                            for (String policyId : group.policyIds) {
-//                                for (Policy policy : policies) {
-//                                    if (policy.id.equals(policyId)) {
-//                                        for (Statement statement : policy.statements) {
-//                                            if (statement.actions.contains(targetAction) &&
-//                                                    statement.resources.contains(targetResource)) {
-//                                                return true;
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        return false;
     }
 }
 
