@@ -142,11 +142,12 @@ class OrderServiceTest {
 
     @Test
     void placeOrder() {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product1));
-        when(productRepository.findById(2L)).thenReturn(Optional.of(product2));
+//        when(productRepository.findById(1L)).thenReturn(Optional.of(product1));
+//        when(productRepository.findById(2L)).thenReturn(Optional.of(product2));
         when(orderRepository.save(any(Order.class))).thenReturn(order1);
 
         List<Long> productIds = Arrays.asList(1L, 2L);
+        when(productRepository.findAllById(productIds)).thenReturn(List.of(product1, product2));
         List<Integer> quantities = Arrays.asList(2, 1);
 
         Order placed = orderService.placeOrder("John Doe", "john@example.com", productIds, quantities);
@@ -157,8 +158,8 @@ class OrderServiceTest {
         assertEquals(Order.OrderStatus.PENDING, placed.getStatus());
         assertEquals(2, placed.getItems().size());
 
-        verify(productRepository, atLeastOnce()).findById(1L);
-        verify(productRepository, atLeastOnce()).findById(2L);
+//        verify(productRepository, atLeastOnce()).findById(1L);
+//        verify(productRepository, atLeastOnce()).findById(2L);
         verify(orderRepository, times(1)).save(any(Order.class));
     }
 
