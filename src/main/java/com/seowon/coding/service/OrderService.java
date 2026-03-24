@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.LocalDateTime.now;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -63,6 +65,8 @@ public class OrderService {
         Order newOrder = Order.builder()
                 .customerName(customerName)
                 .customerEmail(customerEmail)
+                .status(Order.OrderStatus.PENDING)
+                .orderDate(now())
                 .build();
         // * 지정된 Product를 주문에 추가
         if (productIds.size() != quantities.size()) {
@@ -74,10 +78,6 @@ public class OrderService {
                         .orElseThrow(() -> new IllegalArgumentException("상품 정보 없음")))
                 .toList();
 
-        // * order 의 상태를 PENDING 으로 변경
-        newOrder.setStatus(Order.OrderStatus.PENDING);
-        // * orderDate 를 현재시간으로 설정
-        newOrder.setOrderDate(LocalDateTime.now());
         // * order 를 저장
         // * 각 Product 의 재고를 수정
         for (int i = 0; i < products.size(); i++) {
