@@ -15,9 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static java.time.LocalDateTime.now;
 
@@ -73,17 +71,21 @@ public class OrderService {
             throw new IllegalArgumentException("상품 정보가 올바르지 않습니다.");
         }
 
-        List<Product> products = productIds.stream()
-                .map(productId -> productRepository.findById(productId)
-                        .orElseThrow(() -> new IllegalArgumentException("상품 정보 없음")))
-                .toList();
+        List<Product> products = productRepository.findAllById(productIds);
 
         // * order 를 저장
         // * 각 Product 의 재고를 수정
+        Map<Long, Integer> productQuantityMap = new HashMap<>();
+
         for (int i = 0; i < products.size(); i++) {
-            Product product = products.get(i);
-            product.setStockQuantity(quantities.get(i));
+            productQuantityMap.put(productIds.get(i), quantities.get(i));
         }
+
+        for (Product product : products) {
+            Integer changeQuantity = productQuantityMap.get(product.getId());
+            product.setStockQuantity(changeQuantity);
+        }
+
         productRepository.saveAll(products);
 
         List<OrderItem> orderItems = new ArrayList<>(products.size());
